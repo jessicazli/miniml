@@ -1,0 +1,128 @@
+\documentclass[12pt]{article}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
+\usepackage{setspace}
+\usepackage{graphicx}
+
+\title{CS 51 Final Project: MiniML}
+\author{Jessica Li }
+\date{3 May 2023}
+
+\begin{document}
+
+\maketitle
+
+\section*{Table of Contents}
+
+\begin{enumerate}
+  \item Introduction
+  \item Atomic Types: Floats, Strings, and Unit
+  \item Unary Operators: Sin, Cos, Tan, and Additional Float Operators
+  \item Binary Operators: Divide, Power, GreaterThan, and Additional Float Operators
+  \item A Lexically-Scoped Evaluator
+\end{enumerate}
+
+\section{Introduction}
+
+For my final project, I implemented new atomic types, unary operators, binary operators, and a lexically-scoped evaluator. In this writeup, I will explain my design choices and implementation for each extension in addition to showing its functionality.
+
+\section{Floats, Strings, and Unit}
+
+The first extension I implemented was three new atomic types: floats, strings, and unit. 
+
+\subsection*{Floats}
+To implement floats, I changed miniml\_lex.mll to include the following definitions of floats: let float = digit+ `.' digit* and 
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics{float.png}
+\end{figure}
+
+I also edited miniml\_parse.mly to include a float token. 
+
+Functionally, I added the corresponding operators for floats to have basic arithmetic properties such as negation, addition, subtraction, multiplication, and division that I will expand on in later sections.
+
+\subsection*{Strings}
+To implement strings, I changed miniml\_lex.mll to include the following definitions of strings:
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics{string2.png}
+\end{figure}
+\begin{figure}[hbt]
+    \centering
+    \includegraphics{string.png}
+\end{figure}
+
+\subsection*{Unit}
+The last type that I added was the Unit type which is represented by the symbol `()'. As I did with Floats and Strings, I added a unit token to the parser and changed the necessary code in miniml\_lex.mll. The Unit type allows functions without inputs to be defined and used in my compiler. 
+
+
+\section{Unary Operators}
+Additonal unary operators that I added include FloatNegate, Sin, Cos, and Tan.
+
+\subsection*{FloatNegate}
+As an extension to the existing Negate operator for ints, I included the FloatNegate operator to negate floats. In order to do this, I added the symbol `~-.' to miniml\_lex.mll and implemented the following code inside my unop\_helper function.
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=15cm]{negate.png}
+\end{figure}
+
+\subsection*{Sin, Cos, and Tan}
+New unary operators I implemented were the trig functions: sin, cos, and tan. While these functions normally only work on floats in OCaml, I also wanted to allow these functions to take in ints as they normally can in mathematics. Hence, my implementation involves both floats and changing ints to floats before calling these trig functions.
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=15cm]{trig.png}
+\end{figure}
+
+\section{Binary Operators}
+
+Additional binary operators I added include Divide, Power, and GreaterThan in addition to corresponding operators for floats.
+
+\subsection*{Divide}
+I implemented the Divide operator which works with two ints by adding the symbol `/" to miniml\_lex.mll and editing the parser as needed. We can also see in the photo below my FloatPlus, FloatMinus, FloatTimes, and FloatDivide operators so that floats have the same basic functionality as ints. 
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=15cm]{algebra.png}
+\end{figure}
+
+\subsection*{Power}
+Once again, the Power operator was implemented by adding the symbol `**' to miniml\_lex.mll and editing the parser as needed. Similarly to Sin, Cos, and Tan, Power normally only works with floats. However, in my implementation, I wanted to add the ability to take powers with ints. Hence, I modified my binop\_helper function to change ints to floats before evaluating. One interesting to note here is that I changed the result back into an int as an int raised to an int will always result in an int mathematically. 
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=15cm]{power.png}
+\end{figure}
+
+
+\subsection*{GreaterThan}
+The last binary operator I implemented was GreaterThan which is able to compare both ints and floats. This completes the set of compare functions in this compiler. 
+
+\begin{figure}[hbt]
+    \centering
+    \includegraphics[width=15cm]{greaterthan.png}
+\end{figure}
+
+\section{A Lexically-Scoped Evaluator}
+
+The last extension I implemented was a lexically-scoped evaluator. As the readme discussed, the difference between a lexically-scoped evaluator and a dynamically-scoped evaluator is that functions will be evaluated in the environment in which it was defined rather than the environment in which it was called. Hence, eval\_l is the same as eval\_d except for types Fun, Letrec, and App. The implementation of eval\_l involves placing the function within a closure containing its environment and modifying the f inside the environment to have this function as a value. 
+\\
+
+Below, we can see two examples of the difference between dynamic and lexical environments. The first expression -- let x = 1 in let f = fun y $\Rightarrow$ x + y in let x = 2 in f 3 -- evaluates to 5 in a dynamic environment and 4 in a lexical environment. Similarly using float types, the second expression -- let x = 1. in let f = fun y $\Rightarrow$ fun z $\Rightarrow$ z +. (x /. y) in let y = 2. in f 1. 5. -- evaluates to 5.5 in a dynamic environment and 6. in a lexical environment.
+
+    \begin{figure}[hbt]
+        \centering
+        \includegraphics[width=15cm]{lexical.png}
+    \end{figure}
+
+\end{document}
+
+
+
+
